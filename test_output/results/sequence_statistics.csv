@@ -1,0 +1,6 @@
+Sequence_ID,Length_bp,GC_Content_%,AT_Content_%,A_Count,T_Count,G_Count,C_Count,N_Count,Molecular_Weight_Da
+Gene1_BRCA1_partial,790,40.0,60.0,268,206,162,154,0,244486.51
+Gene2_TP53_tumor_suppressor,792,56.69,43.31,170,173,192,257,0,243415.8
+Gene3_EGFR_receptor,792,62.25,37.75,149,150,292,201,0,246568.43
+Gene4_MYC_oncogene,648,64.51,35.49,125,105,188,230,0,199511.64
+Gene5_KRAS_GTPase,648,40.28,59.72,217,170,146,115,0,201016.64

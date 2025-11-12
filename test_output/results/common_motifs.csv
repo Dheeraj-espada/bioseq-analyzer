@@ -1,0 +1,24 @@
+Sequence_ID,Motif,Count,Positions,First_Position,Last_Position,Motif_Name
+Gene5_KRAS_GTPase,TATAAA,1,10,10,10,TATA_box
+Gene3_EGFR_receptor,CCAAT,1,430,430,430,CAAT_box
+Gene2_TP53_tumor_suppressor,GGGCGG,1,729,729,729,GC_box
+Gene3_EGFR_receptor,GGGCGG,2,"413, 417",413,417,GC_box
+Gene5_KRAS_GTPase,AATAAA,1,533,533,533,PolyA_signal
+Gene1_BRCA1_partial,ATG,13,"1, 38, 47, 52, 142, 189, 197, 302, 359, 382...",1,731,Start_codon
+Gene2_TP53_tumor_suppressor,ATG,18,"1, 66, 118, 122, 130, 156, 182, 196, 397, 478...",1,736,Start_codon
+Gene3_EGFR_receptor,ATG,10,"1, 160, 206, 221, 263, 331, 367, 396, 433, 622",1,622,Start_codon
+Gene4_MYC_oncogene,ATG,5,"1, 35, 323, 357, 645",1,645,Start_codon
+Gene5_KRAS_GTPase,ATG,14,"1, 95, 140, 199, 214, 413, 431, 510, 518, 538...",1,642,Start_codon
+Gene1_BRCA1_partial,TAA,12,"45, 192, 203, 315, 336, 353, 471, 573, 576, 698...",45,729,Stop_TAA
+Gene2_TP53_tumor_suppressor,TAA,2,"714, 786",714,786,Stop_TAA
+Gene3_EGFR_receptor,TAA,5,"105, 168, 236, 533, 633",105,633,Stop_TAA
+Gene5_KRAS_GTPase,TAA,12,"12, 68, 134, 251, 255, 261, 301, 311, 496, 535...",12,646,Stop_TAA
+Gene1_BRCA1_partial,TAG,2,"65, 237",65,237,Stop_TAG
+Gene2_TP53_tumor_suppressor,TAG,3,"24, 552, 642",24,642,Stop_TAG
+Gene4_MYC_oncogene,TAG,6,"15, 189, 288, 337, 511, 610",15,610,Stop_TAG
+Gene5_KRAS_GTPase,TAG,13,"23, 41, 107, 131, 294, 314, 346, 453, 525, 528...",23,600,Stop_TAG
+Gene1_BRCA1_partial,TGA,24,"24, 89, 117, 146, 198, 249, 260, 285, 345, 360...",24,762,Stop_TGA
+Gene2_TP53_tumor_suppressor,TGA,17,"41, 81, 123, 128, 150, 165, 183, 365, 441, 506...",41,737,Stop_TGA
+Gene3_EGFR_receptor,TGA,9,"132, 174, 222, 332, 388, 394, 477, 620, 623",132,623,Stop_TGA
+Gene4_MYC_oncogene,TGA,2,"36, 358",36,358,Stop_TGA
+Gene5_KRAS_GTPase,TGA,17,"2, 6, 56, 96, 138, 200, 215, 270, 289, 335...",2,633,Stop_TGA
