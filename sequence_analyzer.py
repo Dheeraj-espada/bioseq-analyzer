@@ -241,8 +241,138 @@ class SequenceAnalyzer:
         
         print(f"\u2705 Generated {len(translation_results)} translations")
         return translation_results
+<<<<<<< HEAD
 
     def generate_visualizations(self, output_dir='output/visualizations'):
+=======
+    
+    def visualize_codon_usage(self, codon_data=None, output_dir='output/visualizations'):
+        """
+        Generate visualizations for codon usage analysis
+        
+        Args:
+            codon_data (list): Codon usage data from analyze_codon_usage()
+            output_dir (str): Output directory for plots
+        """
+        if codon_data is None:
+            codon_data = self.analyze_codon_usage()
+        
+        if not codon_data:
+            print("⚠️  No codon data to visualize")
+            return
+        
+        df_codon = pd.DataFrame(codon_data)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
+        
+        print("📊 Generating codon usage visualizations...")
+        
+        # 1. Top 20 Most Frequent Codons Bar Chart
+        plt.figure(figsize=(14, 8))
+        top20 = df_codon.head(20)
+        colors = plt.cm.viridis(range(len(top20)))
+        
+        bars = plt.bar(range(len(top20)), top20['Frequency_%'], color=colors, alpha=0.8, edgecolor='black')
+        plt.xticks(range(len(top20)), 
+                   [f"{row['Codon']}\n({row['Amino_Acid']})" for _, row in top20.iterrows()],
+                   rotation=0, fontsize=10)
+        plt.ylabel('Frequency (%)', fontsize=12, fontweight='bold')
+        plt.xlabel('Codon (Amino Acid)', fontsize=12, fontweight='bold')
+        plt.title('Top 20 Most Frequent Codons', fontsize=14, fontweight='bold', pad=20)
+        plt.grid(axis='y', alpha=0.3, linestyle='--')
+        
+        # Add value labels on bars
+        for bar in bars:
+            height = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{height:.2f}%',
+                    ha='center', va='bottom', fontsize=8)
+        
+        plt.tight_layout()
+        plt.savefig(f'{output_dir}/codon_frequency_top20.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        # 2. Codon Usage by Amino Acid (Grouped)
+        plt.figure(figsize=(16, 8))
+        aa_grouped = df_codon.groupby('Amino_Acid').agg({
+            'Count': 'sum',
+            'Frequency_%': 'sum'
+        }).sort_values('Count', ascending=False)
+        
+        # Amino acid full names
+        aa_names = {
+            'A': 'Ala', 'R': 'Arg', 'N': 'Asn', 'D': 'Asp', 'C': 'Cys',
+            'Q': 'Gln', 'E': 'Glu', 'G': 'Gly', 'H': 'His', 'I': 'Ile',
+            'L': 'Leu', 'K': 'Lys', 'M': 'Met', 'F': 'Phe', 'P': 'Pro',
+            'S': 'Ser', 'T': 'Thr', 'W': 'Trp', 'Y': 'Tyr', 'V': 'Val',
+            '*': 'Stop'
+        }
+        
+        colors_aa = plt.cm.Set3(range(len(aa_grouped)))
+        bars = plt.bar(range(len(aa_grouped)), aa_grouped['Frequency_%'], 
+                      color=colors_aa, alpha=0.8, edgecolor='black')
+        
+        labels = [f"{aa}\n{aa_names.get(aa, aa)}" for aa in aa_grouped.index]
+        plt.xticks(range(len(aa_grouped)), labels, rotation=0, fontsize=10)
+        plt.ylabel('Total Frequency (%)', fontsize=12, fontweight='bold')
+        plt.xlabel('Amino Acid', fontsize=12, fontweight='bold')
+        plt.title('Codon Usage Grouped by Amino Acid', fontsize=14, fontweight='bold', pad=20)
+        plt.grid(axis='y', alpha=0.3, linestyle='--')
+        
+        plt.tight_layout()
+        plt.savefig(f'{output_dir}/codon_usage_by_amino_acid.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        # 3. Codon Usage Heatmap (by amino acid)
+        # Organize codons by amino acid
+        aa_order = sorted(df_codon['Amino_Acid'].unique())
+        
+        fig, ax = plt.subplots(figsize=(16, 10))
+        
+        # Create matrix for heatmap
+        codon_matrix = []
+        codon_labels = []
+        
+        for aa in aa_order:
+            aa_codons = df_codon[df_codon['Amino_Acid'] == aa].sort_values('Frequency_%', ascending=False)
+            for _, row in aa_codons.iterrows():
+                codon_matrix.append(row['Frequency_%'])
+                codon_labels.append(f"{row['Codon']} ({aa})")
+        
+        # Create heatmap-style bar chart
+        y_pos = range(len(codon_matrix))
+        colors_heat = plt.cm.YlOrRd([x/max(codon_matrix) for x in codon_matrix])
+        
+        plt.barh(y_pos, codon_matrix, color=colors_heat, alpha=0.8, edgecolor='black', linewidth=0.5)
+        plt.yticks(y_pos, codon_labels, fontsize=7)
+        plt.xlabel('Frequency (%)', fontsize=12, fontweight='bold')
+        plt.title('Complete Codon Usage Profile', fontsize=14, fontweight='bold', pad=20)
+        plt.grid(axis='x', alpha=0.3, linestyle='--')
+        
+        plt.tight_layout()
+        plt.savefig(f'{output_dir}/codon_usage_complete.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        # 4. Pie Chart - Top 10 Codons
+        plt.figure(figsize=(10, 10))
+        top10 = df_codon.head(10)
+        others_freq = df_codon.iloc[10:]['Frequency_%'].sum()
+        
+        sizes = list(top10['Frequency_%']) + [others_freq]
+        labels = [f"{row['Codon']} ({row['Amino_Acid']})" for _, row in top10.iterrows()] + ['Others']
+        colors_pie = plt.cm.Set3(range(len(sizes)))
+        
+        plt.pie(sizes, labels=labels, colors=colors_pie, autopct='%1.1f%%',
+               startangle=90, textprops={'fontsize': 10})
+        plt.title('Top 10 Codon Distribution', fontsize=14, fontweight='bold', pad=20)
+        
+        plt.tight_layout()
+        plt.savefig(f'{output_dir}/codon_usage_pie.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        print(f"✅ Codon usage visualizations saved to {output_dir}/")
+    
+    def generate_visualizations(self, output_dir='output/visualizations', include_codon=False):
+>>>>>>> ad48967 (Save local changes before pulling new updates)
         """Generate comprehensive visualizations"""
         print("\n\U0001F4CA Generating visualizations...")
         
@@ -340,7 +470,7 @@ class SequenceAnalyzer:
         
         print(f"\u2705 Visualizations saved to {output_dir}/")
     
-    def export_to_csv(self, output_dir='output/results'):
+    def export_to_csv(self, output_dir='output/results', include_codon=True, include_motifs=True):
         """Export all results to CSV files"""
         print("\n\U0001F4BE Exporting results to CSV...")
         
@@ -366,7 +496,155 @@ class SequenceAnalyzer:
             df_trans = pd.DataFrame(translations)
             trans_file = f'{output_dir}/translations.csv'
             df_trans.to_csv(trans_file, index=False)
+<<<<<<< HEAD
             print(f"\u2705 Translations exported to {trans_file}")
+=======
+            print(f"✅ Translations exported to {trans_file}")
+        
+        # Export codon usage
+        if include_codon:
+            codon_data = self.analyze_codon_usage()
+            if codon_data:
+                df_codon = pd.DataFrame(codon_data)
+                codon_file = f'{output_dir}/codon_usage.csv'
+                df_codon.to_csv(codon_file, index=False)
+                print(f"✅ Codon usage exported to {codon_file}")
+        
+        # Export motif findings
+        if include_motifs:
+            motif_data = self.find_common_motifs()
+            if motif_data:
+                df_motifs = pd.DataFrame(motif_data)
+                motifs_file = f'{output_dir}/common_motifs.csv'
+                df_motifs.to_csv(motifs_file, index=False)
+                print(f"✅ Common motifs exported to {motifs_file}")
+    
+    def analyze_codon_usage(self):
+        """Analyze codon usage patterns across all sequences"""
+        print("\n🧪 Analyzing codon usage...")
+        
+        from collections import defaultdict
+        
+        codon_counts = defaultdict(int)
+        total_codons = 0
+        
+        # Genetic code for reference
+        genetic_code = {
+            'TTT': 'F', 'TTC': 'F', 'TTA': 'L', 'TTG': 'L',
+            'TCT': 'S', 'TCC': 'S', 'TCA': 'S', 'TCG': 'S',
+            'TAT': 'Y', 'TAC': 'Y', 'TAA': '*', 'TAG': '*',
+            'TGT': 'C', 'TGC': 'C', 'TGA': '*', 'TGG': 'W',
+            'CTT': 'L', 'CTC': 'L', 'CTA': 'L', 'CTG': 'L',
+            'CCT': 'P', 'CCC': 'P', 'CCA': 'P', 'CCG': 'P',
+            'CAT': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q',
+            'CGT': 'R', 'CGC': 'R', 'CGA': 'R', 'CGG': 'R',
+            'ATT': 'I', 'ATC': 'I', 'ATA': 'I', 'ATG': 'M',
+            'ACT': 'T', 'ACC': 'T', 'ACA': 'T', 'ACG': 'T',
+            'AAT': 'N', 'AAC': 'N', 'AAA': 'K', 'AAG': 'K',
+            'AGT': 'S', 'AGC': 'S', 'AGA': 'R', 'AGG': 'R',
+            'GTT': 'V', 'GTC': 'V', 'GTA': 'V', 'GTG': 'V',
+            'GCT': 'A', 'GCC': 'A', 'GCA': 'A', 'GCG': 'A',
+            'GAT': 'D', 'GAC': 'D', 'GAA': 'E', 'GAG': 'E',
+            'GGT': 'G', 'GGC': 'G', 'GGA': 'G', 'GGG': 'G'
+        }
+        
+        for seq_id, record in self.sequences.items():
+            seq = str(record.seq).upper()
+            
+            # Analyze codons in frame 0 (most common reading frame)
+            for i in range(0, len(seq)-2, 3):
+                codon = seq[i:i+3]
+                if len(codon) == 3 and all(n in 'ATGC' for n in codon):
+                    codon_counts[codon] += 1
+                    total_codons += 1
+        
+        # Calculate frequencies and organize by amino acid
+        codon_data = []
+        for codon, count in sorted(codon_counts.items(), key=lambda x: x[1], reverse=True):
+            aa = genetic_code.get(codon, 'X')
+            frequency = (count / total_codons * 100) if total_codons > 0 else 0
+            
+            codon_data.append({
+                'Codon': codon,
+                'Amino_Acid': aa,
+                'Count': count,
+                'Frequency_%': round(frequency, 2),
+                'Per_Thousand': round((count / total_codons * 1000), 2) if total_codons > 0 else 0
+            })
+        
+        print(f"✅ Analyzed {total_codons:,} codons")
+        print(f"   Unique codons found: {len(codon_counts)}")
+        
+        return codon_data
+    
+    def find_motif(self, motif):
+        """
+        Find specific motif in all sequences
+        
+        Args:
+            motif (str): DNA motif to search for (e.g., 'TATA', 'CAAT')
+        """
+        print(f"\n🔎 Searching for motif: {motif}")
+        
+        results = []
+        total_occurrences = 0
+        
+        for seq_id, record in self.sequences.items():
+            seq = str(record.seq).upper()
+            motif_upper = motif.upper()
+            positions = []
+            
+            # Find all occurrences
+            start = 0
+            while True:
+                pos = seq.find(motif_upper, start)
+                if pos == -1:
+                    break
+                positions.append(pos + 1)  # 1-based position
+                start = pos + 1
+            
+            if positions:
+                total_occurrences += len(positions)
+                results.append({
+                    'Sequence_ID': seq_id,
+                    'Motif': motif,
+                    'Count': len(positions),
+                    'Positions': ', '.join(map(str, positions[:10])) + ('...' if len(positions) > 10 else ''),
+                    'First_Position': positions[0],
+                    'Last_Position': positions[-1]
+                })
+        
+        print(f"✅ Found {total_occurrences} occurrences in {len(results)} sequences")
+        
+        return results
+    
+    def find_common_motifs(self):
+        """Find common regulatory motifs"""
+        print("\n🔍 Searching for common regulatory motifs...")
+        
+        # Common promoter and regulatory motifs
+        common_motifs = {
+            'TATA_box': 'TATAAA',
+            'CAAT_box': 'CCAAT',
+            'GC_box': 'GGGCGG',
+            'Kozak': 'GCCACCATGG',
+            'PolyA_signal': 'AATAAA',
+            'Start_codon': 'ATG',
+            'Stop_TAA': 'TAA',
+            'Stop_TAG': 'TAG',
+            'Stop_TGA': 'TGA'
+        }
+        
+        all_motif_results = []
+        
+        for motif_name, motif_seq in common_motifs.items():
+            results = self.find_motif(motif_seq)
+            for result in results:
+                result['Motif_Name'] = motif_name
+                all_motif_results.append(result)
+        
+        return all_motif_results
+>>>>>>> ad48967 (Save local changes before pulling new updates)
     
     def generate_summary_report(self):
         """Generate a summary report"""
@@ -423,7 +701,12 @@ Examples:
   python sequence_analyzer.py input.fasta
   python sequence_analyzer.py input.fasta --min-orf 150
   python sequence_analyzer.py input.fasta --output-dir my_results
+<<<<<<< HEAD
   python sequence_analyzer.py input.fasta --codon-usage --viz-codon
+=======
+  python sequence_analyzer.py input.fasta --find-motif TATAAA
+  python sequence_analyzer.py input.fasta --codon-usage
+>>>>>>> ad48967 (Save local changes before pulling new updates)
         '''
     )
     
@@ -434,10 +717,17 @@ Examples:
                        help='Output directory (default: output)')
     parser.add_argument('--no-viz', action='store_true',
                        help='Skip visualization generation')
+<<<<<<< HEAD
     parser.add_argument('--codon-usage', action='store_true',
                        help='Perform codon usage analysis and output CSV')
     parser.add_argument('--viz-codon', action='store_true',
                        help='Generate codon usage frequency plot (use --codon-usage)')
+=======
+    parser.add_argument('--find-motif', type=str, default=None,
+                       help='Search for specific motif (e.g., TATAAA)')
+    parser.add_argument('--codon-usage', action='store_true',
+                       help='Perform codon usage analysis')
+>>>>>>> ad48967 (Save local changes before pulling new updates)
     
     args = parser.parse_args()
     
@@ -445,6 +735,7 @@ Examples:
     if not analyzer.read_fasta():
         sys.exit(1)
     
+<<<<<<< HEAD
     analyzer.calculate_statistics()
     analyzer.find_orfs(min_length=args.min_orf)
     
@@ -452,15 +743,58 @@ Examples:
         viz_dir = f"{args.output_dir}/visualizations"
         analyzer.codon_usage_analysis(output_dir=viz_dir, visualize=args.viz_codon)
     
+=======
+    # Run basic analysis
+    analyzer.calculate_statistics()
+    analyzer.find_orfs(min_length=args.min_orf)
+    
+    # Run optional analyses
+    if args.find_motif:
+        motif_results = analyzer.find_motif(args.find_motif)
+        if motif_results:
+            print("\n🎯 Motif Search Results:")
+            for result in motif_results[:5]:  # Show first 5
+                print(f"   {result['Sequence_ID']}: {result['Count']} occurrences")
+                print(f"      Positions: {result['Positions']}")
+    
+    if args.codon_usage:
+        codon_data = analyzer.analyze_codon_usage()
+        if codon_data:
+            print("\n📊 Top 10 Most Frequent Codons:")
+            for i, codon in enumerate(codon_data[:10], 1):
+                print(f"   {i}. {codon['Codon']} ({codon['Amino_Acid']}): "
+                      f"{codon['Count']} ({codon['Frequency_%']:.2f}%)")
+    
+    # Generate visualizations
+>>>>>>> ad48967 (Save local changes before pulling new updates)
     if not args.no_viz:
         viz_dir = f"{args.output_dir}/visualizations"
         analyzer.generate_visualizations(output_dir=viz_dir)
     
+<<<<<<< HEAD
     results_dir = f"{args.output_dir}/results"
     analyzer.export_to_csv(output_dir=results_dir)
     analyzer.generate_summary_report()
     
     print("\n\u2705 Analysis complete! Check the output directory for results.")
+=======
+    # Export results (includes codon and motif analysis if performed)
+    results_dir = f"{args.output_dir}/results"
+    analyzer.export_to_csv(
+        output_dir=results_dir,
+        include_codon=args.codon_usage,
+        include_motifs=True
+    )
+    
+    # Generate summary
+    analyzer.generate_summary_report()
+    
+    print("\n✅ Analysis complete! Check the output directory for results.")
+    print(f"📁 Results: {results_dir}")
+    if not args.no_viz:
+        print(f"📊 Visualizations: {viz_dir}")
+
+>>>>>>> ad48967 (Save local changes before pulling new updates)
 
 if __name__ == "__main__":
     main()
