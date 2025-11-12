@@ -210,7 +210,7 @@ This project is licensed under the MIT License.
 
 For questions or collaboration:
 - Open an issue on GitHub
-- Email: [Your email if you want to add]
+- Email: dheerajbabu133@gmail.com
 
 ---
 
