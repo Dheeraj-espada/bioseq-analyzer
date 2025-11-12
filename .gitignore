@@ -3,3 +3,34 @@ __pycache__/
 .DS_Store
 .vscode/
 *.swp
+# Output directories
+output/
+results/
+test_output/
+real_data/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
