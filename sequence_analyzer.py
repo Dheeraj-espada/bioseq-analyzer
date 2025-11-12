@@ -16,7 +16,7 @@ from Bio.SeqUtils.ProtParam import ProteinAnalysis
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from collections import Counter, defaultdict
+from collections import Counter
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -39,26 +39,25 @@ class SequenceAnalyzer:
         self.sequences = {}
         self.results = []
         self.all_orfs = []
-        self.codon_usage = None
-    
+        
     def read_fasta(self):
         """Read and parse FASTA file"""
-        print(f"\U0001F4D6 Reading FASTA file: {self.fasta_file}")
+        print(f"📖 Reading FASTA file: {self.fasta_file}")
         try:
             for record in SeqIO.parse(self.fasta_file, "fasta"):
                 self.sequences[record.id] = record
-            print(f"\u2705 Successfully read {len(self.sequences)} sequences")
+            print(f"✅ Successfully read {len(self.sequences)} sequences")
             return True
         except FileNotFoundError:
-            print(f"\u274C Error: File {self.fasta_file} not found")
+            print(f"❌ Error: File {self.fasta_file} not found")
             return False
         except Exception as e:
-            print(f"\u274C Error reading file: {e}")
+            print(f"❌ Error reading file: {e}")
             return False
-
+    
     def calculate_statistics(self):
         """Calculate comprehensive statistics for each sequence"""
-        print("\n\U0001F4CA Calculating sequence statistics...")
+        print("\n📊 Calculating sequence statistics...")
         
         for seq_id, record in self.sequences.items():
             seq = str(record.seq)
@@ -97,9 +96,9 @@ class SequenceAnalyzer:
             
             self.results.append(result)
         
-        print(f"\u2705 Statistics calculated for {len(self.results)} sequences")
+        print(f"✅ Statistics calculated for {len(self.results)} sequences")
         return self.results
-
+    
     def find_orfs(self, min_length=100):
         """
         Find all Open Reading Frames (ORFs) in sequences
@@ -107,7 +106,7 @@ class SequenceAnalyzer:
         Args:
             min_length (int): Minimum ORF length in nucleotides
         """
-        print(f"\n\U0001F50D Finding ORFs (minimum length: {min_length} bp)...")
+        print(f"\n🔍 Finding ORFs (minimum length: {min_length} bp)...")
         
         start_codon = 'ATG'
         stop_codons = {'TAA', 'TAG', 'TGA'}
@@ -160,52 +159,12 @@ class SequenceAnalyzer:
                         
                         aa_start += 1
         
-        print(f"\u2705 Found {len(self.all_orfs)} ORFs across all sequences")
+        print(f"✅ Found {len(self.all_orfs)} ORFs across all sequences")
         return self.all_orfs
-
-    def codon_usage_analysis(self, output_dir=None, visualize=False):
-        """Compute codon usage across all input sequences and optionally generate a heatmap/barplot."""
-        print("\n\U0001F9EC Calculating codon usage...")
-        codon_counts = defaultdict(int)
-        total_codons = 0
-        all_codons = [a+b+c for a in 'ATGC' for b in 'ATGC' for c in 'ATGC']
-        
-        for record in self.sequences.values():
-            seq = str(record.seq).upper()
-            for i in range(0, len(seq) - 2, 3):
-                codon = seq[i:i+3]
-                if len(codon) == 3 and set(codon) <= set('ATGC'):
-                    codon_counts[codon] += 1
-                    total_codons += 1
-        
-        frequencies = {codon: codon_counts.get(codon, 0) / total_codons if total_codons else 0 for codon in all_codons}
-        self.codon_usage = frequencies
-
-        df_codon = pd.DataFrame({
-            'Codon': list(frequencies.keys()),
-            'Frequency': list(frequencies.values())
-        })
-        df_codon = df_codon.sort_values('Codon')
-
-        if output_dir:
-            Path(output_dir).mkdir(parents=True, exist_ok=True)
-            df_codon.to_csv(f"{output_dir}/codon_usage.csv", index=False)
-            print(f"\u2705 Codon usage exported to {output_dir}/codon_usage.csv")
-
-        if visualize:
-            plt.figure(figsize=(16, 6))
-            sns.barplot(data=df_codon, x='Codon', y='Frequency', color='royalblue')
-            plt.title('Codon Usage Frequency', fontsize=14, fontweight='bold')
-            plt.ylabel('Relative Frequency')
-            plt.xlabel('Codon')
-            plt.tight_layout()
-            plt.savefig(f"{output_dir}/codon_usage_barplot.png", dpi=300, bbox_inches='tight')
-            plt.close()
-            print(f"\u2705 Codon usage barplot saved to {output_dir}/codon_usage_barplot.png")
-
+    
     def translate_sequences(self):
         """Translate sequences and analyze proteins"""
-        print("\n\U0001F9EC Translating sequences...")
+        print("\n🧬 Translating sequences...")
         
         translation_results = []
         
@@ -239,12 +198,8 @@ class SequenceAnalyzer:
                             # Skip invalid protein sequences
                             continue
         
-        print(f"\u2705 Generated {len(translation_results)} translations")
+        print(f"✅ Generated {len(translation_results)} translations")
         return translation_results
-<<<<<<< HEAD
-
-    def generate_visualizations(self, output_dir='output/visualizations'):
-=======
     
     def visualize_codon_usage(self, codon_data=None, output_dir='output/visualizations'):
         """
@@ -372,14 +327,13 @@ class SequenceAnalyzer:
         print(f"✅ Codon usage visualizations saved to {output_dir}/")
     
     def generate_visualizations(self, output_dir='output/visualizations', include_codon=False):
->>>>>>> ad48967 (Save local changes before pulling new updates)
         """Generate comprehensive visualizations"""
-        print("\n\U0001F4CA Generating visualizations...")
+        print("\n📊 Generating visualizations...")
         
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         
         if not self.results:
-            print("\u26A0\ufe0f  No results to visualize. Run calculate_statistics() first.")
+            print("⚠️  No results to visualize. Run calculate_statistics() first.")
             return
         
         df = pd.DataFrame(self.results)
@@ -468,11 +422,15 @@ class SequenceAnalyzer:
             plt.savefig(f'{output_dir}/orf_analysis.png', dpi=300, bbox_inches='tight')
             plt.close()
         
-        print(f"\u2705 Visualizations saved to {output_dir}/")
+        print(f"✅ Visualizations saved to {output_dir}/")
+        
+        # Generate codon usage visualizations if requested
+        if include_codon:
+            self.visualize_codon_usage(output_dir=output_dir)
     
     def export_to_csv(self, output_dir='output/results', include_codon=True, include_motifs=True):
         """Export all results to CSV files"""
-        print("\n\U0001F4BE Exporting results to CSV...")
+        print("\n💾 Exporting results to CSV...")
         
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         
@@ -481,14 +439,14 @@ class SequenceAnalyzer:
             df_stats = pd.DataFrame(self.results)
             stats_file = f'{output_dir}/sequence_statistics.csv'
             df_stats.to_csv(stats_file, index=False)
-            print(f"\u2705 Statistics exported to {stats_file}")
+            print(f"✅ Statistics exported to {stats_file}")
         
         # Export ORF data
         if self.all_orfs:
             df_orfs = pd.DataFrame(self.all_orfs)
             orfs_file = f'{output_dir}/orfs_found.csv'
             df_orfs.to_csv(orfs_file, index=False)
-            print(f"\u2705 ORFs exported to {orfs_file}")
+            print(f"✅ ORFs exported to {orfs_file}")
         
         # Export translation results
         translations = self.translate_sequences()
@@ -496,9 +454,6 @@ class SequenceAnalyzer:
             df_trans = pd.DataFrame(translations)
             trans_file = f'{output_dir}/translations.csv'
             df_trans.to_csv(trans_file, index=False)
-<<<<<<< HEAD
-            print(f"\u2705 Translations exported to {trans_file}")
-=======
             print(f"✅ Translations exported to {trans_file}")
         
         # Export codon usage
@@ -644,12 +599,11 @@ class SequenceAnalyzer:
                 all_motif_results.append(result)
         
         return all_motif_results
->>>>>>> ad48967 (Save local changes before pulling new updates)
     
     def generate_summary_report(self):
         """Generate a summary report"""
         print("\n" + "="*60)
-        print("\U0001F4CB SEQUENCE ANALYSIS SUMMARY REPORT")
+        print("📋 SEQUENCE ANALYSIS SUMMARY REPORT")
         print("="*60)
         
         if not self.results:
@@ -658,7 +612,7 @@ class SequenceAnalyzer:
         
         df = pd.DataFrame(self.results)
         
-        print(f"\n\U0001F4CA GENERAL STATISTICS")
+        print(f"\n📊 GENERAL STATISTICS")
         print(f"   Total Sequences: {len(df)}")
         print(f"   Total Base Pairs: {df['Length_bp'].sum():,}")
         print(f"   Average Length: {df['Length_bp'].mean():.2f} bp")
@@ -666,13 +620,13 @@ class SequenceAnalyzer:
         print(f"   Min Length: {df['Length_bp'].min()} bp")
         print(f"   Max Length: {df['Length_bp'].max()} bp")
         
-        print(f"\n\U0001F9EC GC CONTENT ANALYSIS")
+        print(f"\n🧬 GC CONTENT ANALYSIS")
         print(f"   Average GC Content: {df['GC_Content_%'].mean():.2f}%")
         print(f"   Median GC Content: {df['GC_Content_%'].median():.2f}%")
         print(f"   Min GC Content: {df['GC_Content_%'].min():.2f}%")
         print(f"   Max GC Content: {df['GC_Content_%'].max():.2f}%")
         
-        print(f"\n\U0001F4E6 NUCLEOTIDE COMPOSITION (Total)")
+        print(f"\n📦 NUCLEOTIDE COMPOSITION (Total)")
         print(f"   A: {df['A_Count'].sum():,}")
         print(f"   T: {df['T_Count'].sum():,}")
         print(f"   G: {df['G_Count'].sum():,}")
@@ -681,7 +635,7 @@ class SequenceAnalyzer:
         
         if self.all_orfs:
             orf_df = pd.DataFrame(self.all_orfs)
-            print(f"\n\U0001F50D ORF ANALYSIS")
+            print(f"\n🔍 ORF ANALYSIS")
             print(f"   Total ORFs Found: {len(orf_df)}")
             print(f"   Average ORF Length: {orf_df['Length_bp'].mean():.2f} bp")
             print(f"   Longest ORF: {orf_df['Length_bp'].max()} bp")
@@ -701,12 +655,8 @@ Examples:
   python sequence_analyzer.py input.fasta
   python sequence_analyzer.py input.fasta --min-orf 150
   python sequence_analyzer.py input.fasta --output-dir my_results
-<<<<<<< HEAD
-  python sequence_analyzer.py input.fasta --codon-usage --viz-codon
-=======
   python sequence_analyzer.py input.fasta --find-motif TATAAA
   python sequence_analyzer.py input.fasta --codon-usage
->>>>>>> ad48967 (Save local changes before pulling new updates)
         '''
     )
     
@@ -717,33 +667,22 @@ Examples:
                        help='Output directory (default: output)')
     parser.add_argument('--no-viz', action='store_true',
                        help='Skip visualization generation')
-<<<<<<< HEAD
-    parser.add_argument('--codon-usage', action='store_true',
-                       help='Perform codon usage analysis and output CSV')
-    parser.add_argument('--viz-codon', action='store_true',
-                       help='Generate codon usage frequency plot (use --codon-usage)')
-=======
     parser.add_argument('--find-motif', type=str, default=None,
                        help='Search for specific motif (e.g., TATAAA)')
     parser.add_argument('--codon-usage', action='store_true',
                        help='Perform codon usage analysis')
->>>>>>> ad48967 (Save local changes before pulling new updates)
+    parser.add_argument('--viz-codon', action='store_true',
+                       help='Generate codon usage visualizations')
     
     args = parser.parse_args()
     
+    # Initialize analyzer
     analyzer = SequenceAnalyzer(args.fasta_file)
+    
+    # Read FASTA file
     if not analyzer.read_fasta():
         sys.exit(1)
     
-<<<<<<< HEAD
-    analyzer.calculate_statistics()
-    analyzer.find_orfs(min_length=args.min_orf)
-    
-    if args.codon_usage:
-        viz_dir = f"{args.output_dir}/visualizations"
-        analyzer.codon_usage_analysis(output_dir=viz_dir, visualize=args.viz_codon)
-    
-=======
     # Run basic analysis
     analyzer.calculate_statistics()
     analyzer.find_orfs(min_length=args.min_orf)
@@ -766,18 +705,13 @@ Examples:
                       f"{codon['Count']} ({codon['Frequency_%']:.2f}%)")
     
     # Generate visualizations
->>>>>>> ad48967 (Save local changes before pulling new updates)
     if not args.no_viz:
         viz_dir = f"{args.output_dir}/visualizations"
-        analyzer.generate_visualizations(output_dir=viz_dir)
+        analyzer.generate_visualizations(
+            output_dir=viz_dir,
+            include_codon=args.viz_codon or args.codon_usage
+        )
     
-<<<<<<< HEAD
-    results_dir = f"{args.output_dir}/results"
-    analyzer.export_to_csv(output_dir=results_dir)
-    analyzer.generate_summary_report()
-    
-    print("\n\u2705 Analysis complete! Check the output directory for results.")
-=======
     # Export results (includes codon and motif analysis if performed)
     results_dir = f"{args.output_dir}/results"
     analyzer.export_to_csv(
@@ -794,7 +728,6 @@ Examples:
     if not args.no_viz:
         print(f"📊 Visualizations: {viz_dir}")
 
->>>>>>> ad48967 (Save local changes before pulling new updates)
 
 if __name__ == "__main__":
     main()
