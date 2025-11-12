@@ -26,7 +26,7 @@ class EnhancedSequenceParser:
         self.sequences = {}
         
     def _detect_format(self):
-        """Auto-detect file format from extension"""
+        """Auto-detect file format"""
         suffix = self.filepath.suffix.lower()
         if suffix in self.SUPPORTED_FORMATS:
             return self.SUPPORTED_FORMATS[suffix]
@@ -44,10 +44,9 @@ class EnhancedSequenceParser:
                 elif first_line.startswith('ID'):
                     return 'embl'
                 else:
-                    print(f"⚠️  Unknown format, trying FASTA...")
                     return 'fasta'
         except Exception as e:
-            print(f"❌ Error reading file: {e}")
+            print(f"❌ Error: {e}")
             sys.exit(1)
     
     def parse(self):
@@ -67,24 +66,10 @@ class EnhancedSequenceParser:
             
         except Exception as e:
             print(f"❌ Error: {e}")
-            # Try alternative formats
-            for fmt in ['fasta', 'genbank', 'embl']:
-                if fmt != self.format:
-                    try:
-                        self.sequences = {}
-                        for record in SeqIO.parse(self.filepath, fmt):
-                            self.sequences[record.id] = record
-                        if len(self.sequences) > 0:
-                            print(f"✅ Parsed as {fmt.upper()}")
-                            self.format = fmt
-                            return self.sequences
-                    except:
-                        continue
-            print(f"❌ Could not parse file")
             return None
     
     def get_metadata(self):
-        """Extract metadata from sequences"""
+        """Extract metadata"""
         metadata = []
         for seq_id, record in self.sequences.items():
             meta = {
@@ -98,16 +83,14 @@ class EnhancedSequenceParser:
             if self.format == 'genbank':
                 annotations = record.annotations
                 meta['Organism'] = annotations.get('organism', 'N/A')
-                meta['Taxonomy'] = ', '.join(annotations.get('taxonomy', []))[:100]
                 meta['Features'] = len(record.features)
             
             metadata.append(meta)
         return metadata
     
     def convert_format(self, output_file, output_format='fasta'):
-        """Convert sequences to different format"""
+        """Convert to different format"""
         if not self.sequences:
-            print("⚠️  No sequences to convert")
             return False
         
         try:
@@ -115,36 +98,5 @@ class EnhancedSequenceParser:
             print(f"✅ Converted to {output_format.upper()}: {output_file}")
             return True
         except Exception as e:
-            print(f"❌ Conversion failed: {e}")
+            print(f"❌ Error: {e}")
             return False
-
-
-if __name__ == "__main__":
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='Enhanced Sequence Parser')
-    parser.add_argument('input_file', help='Input sequence file')
-    parser.add_argument('--show-metadata', action='store_true',
-                       help='Show metadata')
-    parser.add_argument('--convert', help='Convert to format')
-    parser.add_argument('--output', help='Output file')
-    
-    args = parser.parse_args()
-    
-    # Parse file
-    seq_parser = EnhancedSequenceParser(args.input_file)
-    sequences = seq_parser.parse()
-    
-    if not sequences:
-        sys.exit(1)
-    
-    # Show metadata
-    if args.show_metadata:
-        metadata = seq_parser.get_metadata()
-        df = pd.DataFrame(metadata)
-        print("\n📋 Metadata:")
-        print(df.to_string(index=False))
-    
-    # Convert format
-    if args.convert and args.output:
-        seq_parser.convert_format(args.output, args.convert)
