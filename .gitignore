@@ -1,27 +1,31 @@
-*.pyc
-__pycache__/
-.DS_Store
-.vscode/
-*.swp
-# Output directories
-output/
-results/
-test_output/
-real_data/
-
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
+*.py[cod]
+*$py.class
 *.so
-*.egg
-*.egg-info/
-dist/
+.Python
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# IDE
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDEs
 .vscode/
 .idea/
 *.swp
@@ -32,5 +36,26 @@ build/
 .DS_Store
 Thumbs.db
 
+# Project specific - outputs
+output/
+results/
+test_output/
+verify_test/
+week4_test/
+week4_analysis/
+*_analysis/
+
+# Data (optional - remove if you want to track small datasets)
+real_data/
+
+# Reports
+*.html
+!docs/*.html
+
 # Jupyter
 .ipynb_checkpoints/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
